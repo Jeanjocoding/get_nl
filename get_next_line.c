@@ -9,12 +9,13 @@
 //
 //ca peut se faire en remplacant stop par un booleen indiquant si ret = 0 ou non. on met ensuite ce booleen en parametre du buf parser qui du coup retournera la structure complete avec un stop a 0
 
-g_list		*buf_parser(void *buf)
+g_list		*buf_parser(void *buf, int stop)
 {
 	int	i;
 	g_list	*list;
 
 	i = 0;
+//	printf("buf : %s\n", buf);
 	if (!(list = (g_list*)malloc(sizeof(g_list*))))
 		return (NULL);
 	if (ft_memchr(buf, '\n', ft_strlen((char*)buf)) != NULL)
@@ -29,11 +30,22 @@ g_list		*buf_parser(void *buf)
 		else
 			list->rest = NULL;
 	}
-	else
+	else if (stop == 0)
 	{
 		list->line = NULL;
 		if (!(list->rest = ft_strdup((char*)buf)))
 			return (NULL);
+	}
+	else if (stop == 1 && ft_strlen(buf) > 0)
+	{
+		if (!(list->line = ft_strdup((char*)buf)))
+			return (NULL);
+		list->complet = 2;
+	}
+	else if (stop == 1 && ft_strlen(buf) == 0)
+	{
+		list->line = NULL;
+		list->complet = 1;
 	}
 	return (list);
 }
@@ -44,27 +56,26 @@ g_list		*line_finder(char *pline, int fd)
 	char	*temp;
 	char	buf[BUFF_SIZE + 1];
 	int		ret;
-	g_list	*stop;
+	int		stop;
 
-	if (!(stop = (g_list*)malloc(sizeof(g_list*))))
-		return (NULL);
 	ret = 10;
+	stop = 0;
 	temp = ft_strextract(ft_strchr((char*)pline, '\n'), '\0', 1);
 	while (temp == NULL && ret > 0)
 	{
 		ret = read(fd, buf, BUFF_SIZE);
 		if (ret == 0)
+			stop = 1;
+		else
 		{
-			stop->complet = 2;
-			return (stop);
+			buf[ret] = '\0';
+			if (!(join = ft_join_free(pline, ft_strdup((char*)buf))))
+				return (NULL);
+			pline = join;
+			temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
 		}
-		buf[BUFF_SIZE] = '\0';
-		if (!(join = ft_join_free(pline, ft_strdup((char*)buf))))
-			return (NULL);
-		pline = join;
-		temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
 	}
-	return (buf_parser(pline));
+	return (buf_parser(pline, stop));
 }
 
 int	get_next_line(const int fd, char **line)
@@ -82,7 +93,7 @@ int	get_next_line(const int fd, char **line)
 	}
 	if (!(actual = line_finder(prev[fd]->rest, fd)))
 		return (-1);
-	if (actual->complet == 2)
+	if (actual->complet == 1 )
 		return (0);
 	*line = actual->line;
 	free(prev[fd]);

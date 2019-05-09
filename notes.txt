@@ -1,0 +1,1 @@
+ca segfault quand il y a une seule ligne sans newline a la fin

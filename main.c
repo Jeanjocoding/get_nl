@@ -4,7 +4,7 @@
 
 int		get_next_line(const int fd, char **line);
 
-int	main(void)
+int	main(int ac, char **av)
 {
 	int	fd;
 	int	fd2;
@@ -15,8 +15,8 @@ int	main(void)
 	int		i;
 	i = 0;
 
-
-	fd = open("test.txt", O_RDONLY);
+	(void)ac;
+	fd = open(av[1], O_RDONLY);
 //	fd2 = open("test2.txt", O_RDONLY);
 
 	//	read(fd, buf, BUF_SIZE);
@@ -27,12 +27,13 @@ int	main(void)
 	//	return (0);
 //	printf("gnl : %d\n", get_next_line(fd, &bjr));
 //	printf("real 2 : %s\n", bjr);
-	while (get_next_line(fd, &bjr))
+	while (get_next_line(fd, &bjr) != 0)
 		printf("real 3 : %s\n", bjr);
 	close(fd);
 	return (0);
 	get_next_line(fd, &bjr);
 	printf("real 3 : %s\n", bjr);
+	return (0);
 	get_next_line(fd2, &bjr);
 	printf("real 3 : %s\n", bjr);
 	get_next_line(fd, &bjr);

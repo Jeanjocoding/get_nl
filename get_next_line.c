@@ -2,18 +2,6 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-// idee pour gagner lignes sur line_finder: mettre ret en parametre
-// faire fonction pour free g_list et retourner null
-//
-//
-//il faut reussir a faire en sorte que si ligne pas terminee par \n la ligne soit quand meme ecrite et que la fonc renvoie 1
-//
-//ca peut se faire en remplacant stop par un booleen indiquant si ret = 0 ou non. on met ensuite ce booleen en parametre du buf parser qui du coup retournera la structure complete avec un stop a 0
-
-//probleme: get se relance alors que prev[fd] complet = 2
-
-// check line null, buf size < 1 et read blanc
-
 g_list		*buf_parser(char **buf, int stop)
 {
 	int	i;
@@ -35,22 +23,18 @@ g_list		*buf_parser(char **buf, int stop)
 		}
 		else
 			list->rest = NULL;
-		ft_memdel((void**)buf);
 	}
-	else if (stop == 1 && ft_strlen(*buf) > 0)
+	else if (stop == 1) 
 	{
 		list->rest = NULL;
-		list->complet = 2;
 		if (!(list->line = ft_strdup(*buf)))
 			return (NULL);
-		ft_memdel((void**)buf);
+		if (ft_strlen(*buf) > 0)
+			list->complet = 2;
+		else
+			list->complet = 1;
 	}
-	else if (stop == 1 && ft_strlen(*buf) == 0)
-	{
-		list->line = NULL;
-		list->rest = NULL;
-		list->complet = 1;
-	}
+	ft_memdel((void**)buf);
 	return (list);
 }
 
@@ -65,7 +49,6 @@ g_list		*line_finder(char **pline, int fd)
 	ret = 10;
 	stop = 0;
 	join = NULL;
-//	temp = ft_strextract(ft_strchr(*pline, '\n'), '\0', 1);
 	temp = ft_strchr(*pline, '\n');
 	while (temp == NULL && ret > 0)
 	{
@@ -81,11 +64,9 @@ g_list		*line_finder(char **pline, int fd)
 				return (NULL);
 			ft_memdel((void**)pline);
 			*pline = join;
-//			temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
 			temp = ft_strchr((char*)buf, '\n');
 		}
 	}
-//	ft_memdel((void**)&temp);
 	return (buf_parser(pline, stop));
 }
 

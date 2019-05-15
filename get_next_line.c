@@ -12,37 +12,40 @@
 
 //probleme: get se relance alors que prev[fd] complet = 2
 
-g_list		*buf_parser(char *buf, int stop)
+// check line null, buf size < 1 et read blanc
+
+g_list		*buf_parser(char **buf, int stop)
 {
 	int	i;
 	g_list	*list;
 
 	i = 0;
+	list = NULL;
 	if (!(list = (g_list*)malloc(sizeof(g_list))))
 		return (NULL);
 	list->complet = 0;
-	if (ft_memchr(buf, '\n', ft_strlen(buf)) != NULL)
+	if (ft_memchr(*buf, '\n', ft_strlen(*buf)) != NULL)
 	{
-		if (!(list->line = ft_strextract((char*)(buf), '\n', 0)))
+		if (!(list->line = ft_strextract(*buf, '\n', 0)))
 			return (NULL);
-		if (ft_strlen((char*)list->line) < ft_strlen((char*)buf))
+		if (ft_strlen(list->line) < ft_strlen(*buf))
 		{
-			if (!(list->rest = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1)))
+			if (!(list->rest = ft_strextract(ft_strchr(*buf, '\n'), '\0', 1)))
 				return (NULL);
 		}
 		else
 			list->rest = NULL;
-		ft_memdel((void**)&buf);
+		ft_memdel((void**)buf);
 	}
-	else if (stop == 1 && ft_strlen(buf) > 0)
+	else if (stop == 1 && ft_strlen(*buf) > 0)
 	{
 		list->rest = NULL;
 		list->complet = 2;
-		if (!(list->line = ft_strdup(buf)))
+		if (!(list->line = ft_strdup(*buf)))
 			return (NULL);
-		ft_memdel((void**)&buf);
+		ft_memdel((void**)buf);
 	}
-	else if (stop == 1 && ft_strlen(buf) == 0)
+	else if (stop == 1 && ft_strlen(*buf) == 0)
 	{
 		list->line = NULL;
 		list->rest = NULL;
@@ -55,7 +58,7 @@ g_list		*buf_parser(char *buf, int stop)
 	return (list);
 }
 
-g_list		*line_finder(char *pline, int fd)
+g_list		*line_finder(char **pline, int fd)
 {
 	char	*join;
 	char	*temp;
@@ -65,27 +68,36 @@ g_list		*line_finder(char *pline, int fd)
 
 	ret = 10;
 	stop = 0;
-	temp = ft_strextract(ft_strchr(pline, '\n'), '\0', 1);
+	join = NULL;
+	temp = ft_strextract(ft_strchr(*pline, '\n'), '\0', 1);
 	while (temp == NULL && ret > 0)
 	{
 		ret = read(fd, buf, BUFF_SIZE);
 		if (ret == 0)
 			stop = 1;
-		if (ret == -1)
+		else if (ret == -1)
 			return (NULL);
-		else
+		else if (ret > 0)
 		{
 			buf[ret] = '\0';
-			if (!(join = ft_join_free(pline, ft_strdup((char*)buf))))
+//			printf("lf_pline : %s\n", *pline);
+//			printf("lf_buf : %s\n", buf);
+		//	if (!(join = ft_join_free(pline, ft_strdup((char*)buf))))
+		//		return (NULL);
+			if (!(join = ft_strjoin(*pline, buf)))
 				return (NULL);
-			pline = join;
+//
+			ft_memdel((void**)pline);
+//			if (pline != NULL)
+//				free(pline);
+			*pline = join;
 			temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
 		}
 	}
-//	printf("lf_pline : %s\n", pline);
+//	printf("lf_pline_final : %s\n", *pline);
 //	printf("lf_stop : %d\n\n\n", stop);
-	if (temp != NULL)
-		ft_memdel((void**)&temp);
+//	if (temp != NULL)
+	ft_memdel((void**)&temp);
 	return (buf_parser(pline, stop));
 }
 
@@ -93,8 +105,10 @@ int	get_next_line(const int fd, char **line)
 {
 	static g_list	*prev[MAX_FD];
 	g_list		*actual;
+	char 		buf[BUFF_SIZE + 1];
 
-	if (fd < 0 || fd > 7168)
+	actual = NULL;
+	if (fd < 0 || fd > 7168  || line == NULL || read(fd, buf, 0) == -1)
 		return (-1);
 	if ((prev[fd] == NULL || prev[fd]->rest == NULL))
 	{
@@ -104,19 +118,20 @@ int	get_next_line(const int fd, char **line)
 				return (-1);
 		}
 		(prev[fd])->rest = ft_strnew(1);
+		(prev[fd])->complet = 0;
 	}
 	if (prev[fd]->complet == 1 || prev[fd]->complet == 2)
 		return (0);
-	if (!(actual = line_finder(prev[fd]->rest, fd)))
+	if (!(actual = line_finder(&prev[fd]->rest, fd)))
 		return (-1);
 	if (actual->complet == 1)
 		return (0);
 	*line = actual->line;
-//	if (prev[fd]->rest != NULL)
-//		free(prev[fd]->rest);
-//	if (prev[fd]->line != NULL)
-//		free(prev[fd]->line);
-	free(prev[fd]);
+	if (prev[fd] != NULL)
+	{
+		free(prev[fd]);
+		prev[fd] = NULL;
+	}
 	prev[fd] = actual;
 	return (1);
 }

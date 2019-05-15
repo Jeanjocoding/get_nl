@@ -28,12 +28,12 @@ int	main(int ac, char **av)
 //	printf("gnl : %d\n", get_next_line(fd, &bjr));
 //	printf("real 2 : %s\n", bjr);
 //	close(fd);
-	while (i < 10)
-	{
+//	while (i < 10)
+//	{
 		printf(" return value : %d\n", get_next_line(fd, &bjr));
-		printf("real 3 : %s\n\n", bjr);
-		i++;
-	}
+		printf("real 3 : %s\n", bjr);
+//		i++;
+//	}
 	close(fd);
 	return (0);
 	get_next_line(fd, &bjr);

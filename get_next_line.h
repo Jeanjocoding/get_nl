@@ -6,7 +6,7 @@
 /*   By: tlucille <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/06 16:50:58 by tlucille          #+#    #+#             */
-/*   Updated: 2019/05/14 19:19:07 by tlucille         ###   ########.fr       */
+/*   Updated: 2019/05/15 16:22:56 by tlucille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define BUFF_SIZE 1
+#define BUFF_SIZE 1000000
 #define	MAX_FD 4864
 
 int				get_next_line(const int fd, char **line);

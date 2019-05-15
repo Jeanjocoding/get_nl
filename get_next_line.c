@@ -51,10 +51,6 @@ g_list		*buf_parser(char **buf, int stop)
 		list->rest = NULL;
 		list->complet = 1;
 	}
-//	printf("buf_line : %s\n", list->line);
-//	printf("buf_rest : %s\n", list->rest);
-//	printf("buf_comp : %d\n\n\n", list->complet);
-//	printf(" buf : %s\n", buf);
 	return (list);
 }
 
@@ -69,7 +65,8 @@ g_list		*line_finder(char **pline, int fd)
 	ret = 10;
 	stop = 0;
 	join = NULL;
-	temp = ft_strextract(ft_strchr(*pline, '\n'), '\0', 1);
+//	temp = ft_strextract(ft_strchr(*pline, '\n'), '\0', 1);
+	temp = ft_strchr(*pline, '\n');
 	while (temp == NULL && ret > 0)
 	{
 		ret = read(fd, buf, BUFF_SIZE);
@@ -80,24 +77,15 @@ g_list		*line_finder(char **pline, int fd)
 		else if (ret > 0)
 		{
 			buf[ret] = '\0';
-//			printf("lf_pline : %s\n", *pline);
-//			printf("lf_buf : %s\n", buf);
-		//	if (!(join = ft_join_free(pline, ft_strdup((char*)buf))))
-		//		return (NULL);
 			if (!(join = ft_strjoin(*pline, buf)))
 				return (NULL);
-//
 			ft_memdel((void**)pline);
-//			if (pline != NULL)
-//				free(pline);
 			*pline = join;
-			temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
+//			temp = ft_strextract(ft_strchr((char*)buf, '\n'), '\0', 1);
+			temp = ft_strchr((char*)buf, '\n');
 		}
 	}
-//	printf("lf_pline_final : %s\n", *pline);
-//	printf("lf_stop : %d\n\n\n", stop);
-//	if (temp != NULL)
-	ft_memdel((void**)&temp);
+//	ft_memdel((void**)&temp);
 	return (buf_parser(pline, stop));
 }
 
@@ -113,10 +101,8 @@ int	get_next_line(const int fd, char **line)
 	if ((prev[fd] == NULL || prev[fd]->rest == NULL))
 	{
 		if (prev[fd] == NULL)
-		{
 			if (!(prev[fd] = (g_list*)malloc(sizeof(g_list))))
 				return (-1);
-		}
 		(prev[fd])->rest = ft_strnew(1);
 		(prev[fd])->complet = 0;
 	}
@@ -127,11 +113,7 @@ int	get_next_line(const int fd, char **line)
 	if (actual->complet == 1)
 		return (0);
 	*line = actual->line;
-	if (prev[fd] != NULL)
-	{
-		free(prev[fd]);
-		prev[fd] = NULL;
-	}
+	ft_memdel((void**)&prev[fd]);
 	prev[fd] = actual;
 	return (1);
 }

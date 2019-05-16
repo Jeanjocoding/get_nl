@@ -1,10 +1,34 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucille <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/05/16 12:43:15 by tlucille          #+#    #+#             */
+/*   Updated: 2019/05/16 14:28:03 by tlucille         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft.h"
 #include "get_next_line.h"
-#include <stdio.h>
 
-g_list		*buf_parser(char **buf, int stop)
+g_list		*bp_last_line(g_list **list, char **buf)
 {
-	int	i;
+	(*list)->rest = NULL;
+	if (!((*list)->line = ft_strdup(*buf)))
+		return (NULL);
+	if (ft_strlen(*buf) > 0)
+		(*list)->complet = 2;
+	else
+		(*list)->complet = 1;
+	ft_memdel((void**)buf);
+	return (*list);
+}
+
+g_list		*buf_parser(char **buf)
+{
+	int		i;
 	g_list	*list;
 
 	i = 0;
@@ -23,19 +47,11 @@ g_list		*buf_parser(char **buf, int stop)
 		}
 		else
 			list->rest = NULL;
+		ft_memdel((void**)buf);
+		return (list);
 	}
-	else if (stop == 1) 
-	{
-		list->rest = NULL;
-		if (!(list->line = ft_strdup(*buf)))
-			return (NULL);
-		if (ft_strlen(*buf) > 0)
-			list->complet = 2;
-		else
-			list->complet = 1;
-	}
-	ft_memdel((void**)buf);
-	return (list);
+	else
+		return (bp_last_line(&list, buf));
 }
 
 g_list		*line_finder(char **pline, int fd)
@@ -44,18 +60,14 @@ g_list		*line_finder(char **pline, int fd)
 	char	*temp;
 	char	buf[BUFF_SIZE + 1];
 	int		ret;
-	int		stop;
 
 	ret = 10;
-	stop = 0;
 	join = NULL;
 	temp = ft_strchr(*pline, '\n');
 	while (temp == NULL && ret > 0)
 	{
 		ret = read(fd, buf, BUFF_SIZE);
-		if (ret == 0)
-			stop = 1;
-		else if (ret == -1)
+		if (ret == -1)
 			return (NULL);
 		else if (ret > 0)
 		{
@@ -67,17 +79,17 @@ g_list		*line_finder(char **pline, int fd)
 			temp = ft_strchr((char*)buf, '\n');
 		}
 	}
-	return (buf_parser(pline, stop));
+	return (buf_parser(pline));
 }
 
-int	get_next_line(const int fd, char **line)
+int			get_next_line(const int fd, char **line)
 {
 	static g_list	*prev[MAX_FD];
-	g_list		*actual;
-	char 		buf[BUFF_SIZE + 1];
+	g_list			*actual;
+	char			buf[BUFF_SIZE + 1];
 
 	actual = NULL;
-	if (fd < 0 || fd > 7168  || line == NULL || read(fd, buf, 0) == -1)
+	if (fd < 0 || fd > 7168 || line == NULL || read(fd, buf, 0) == -1)
 		return (-1);
 	if ((prev[fd] == NULL || prev[fd]->rest == NULL))
 	{
@@ -87,7 +99,7 @@ int	get_next_line(const int fd, char **line)
 		(prev[fd])->rest = ft_strnew(1);
 		(prev[fd])->complet = 0;
 	}
-	if (prev[fd]->complet == 1 || prev[fd]->complet == 2)
+	if (prev[fd]->complet == 2)
 		return (0);
 	if (!(actual = line_finder(&prev[fd]->rest, fd)))
 		return (-1);

@@ -6,34 +6,39 @@
 /*   By: tlucille <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/16 12:43:15 by tlucille          #+#    #+#             */
-/*   Updated: 2019/05/16 14:28:03 by tlucille         ###   ########.fr       */
+/*   Updated: 2019/05/16 17:30:03 by tlucille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "libft/includes/libft.h"
 #include "get_next_line.h"
 
-g_list		*bp_last_line(g_list **list, char **buf)
+t_list		*bp_last_line(t_list **list, char **buf)
 {
 	(*list)->rest = NULL;
-	if (!((*list)->line = ft_strdup(*buf)))
-		return (NULL);
 	if (ft_strlen(*buf) > 0)
+	{
+		if (!((*list)->line = ft_strdup(*buf)))
+			return (NULL);
 		(*list)->complet = 2;
+	}
 	else
+	{
+		(*list)->line = NULL;
 		(*list)->complet = 1;
+	}
 	ft_memdel((void**)buf);
 	return (*list);
 }
 
-g_list		*buf_parser(char **buf)
+t_list		*buf_parser(char **buf)
 {
 	int		i;
-	g_list	*list;
+	t_list	*list;
 
 	i = 0;
 	list = NULL;
-	if (!(list = (g_list*)malloc(sizeof(g_list))))
+	if (!(list = (t_list*)malloc(sizeof(t_list))))
 		return (NULL);
 	list->complet = 0;
 	if (ft_memchr(*buf, '\n', ft_strlen(*buf)) != NULL)
@@ -54,7 +59,7 @@ g_list		*buf_parser(char **buf)
 		return (bp_last_line(&list, buf));
 }
 
-g_list		*line_finder(char **pline, int fd)
+t_list		*line_finder(char **pline, int fd)
 {
 	char	*join;
 	char	*temp;
@@ -84,8 +89,8 @@ g_list		*line_finder(char **pline, int fd)
 
 int			get_next_line(const int fd, char **line)
 {
-	static g_list	*prev[MAX_FD];
-	g_list			*actual;
+	static t_list	*prev[MAX_FD];
+	t_list			*actual;
 	char			buf[BUFF_SIZE + 1];
 
 	actual = NULL;
@@ -94,7 +99,7 @@ int			get_next_line(const int fd, char **line)
 	if ((prev[fd] == NULL || prev[fd]->rest == NULL))
 	{
 		if (prev[fd] == NULL)
-			if (!(prev[fd] = (g_list*)malloc(sizeof(g_list))))
+			if (!(prev[fd] = (t_list*)malloc(sizeof(t_list))))
 				return (-1);
 		(prev[fd])->rest = ft_strnew(1);
 		(prev[fd])->complet = 0;

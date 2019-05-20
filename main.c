@@ -19,7 +19,7 @@ int	main(int ac, char **av)
 	(void)ac;
 	fd1 = open(av[1], O_RDONLY);
 	fd2 = open(av[2], O_RDONLY);
-	fd3 = open(av[3], O_RDONLY);
+	fd3 = 0; // open(av[3], O_RDONLY);
 	while (ret1 > 0 || ret2 > 0 || ret3 > 0)
 	{
 		printf("\033[1;32m"); 

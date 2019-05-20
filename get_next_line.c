@@ -6,7 +6,7 @@
 /*   By: tlucille <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/16 12:43:15 by tlucille          #+#    #+#             */
-/*   Updated: 2019/05/16 17:34:09 by tlucille         ###   ########.fr       */
+/*   Updated: 2019/05/20 12:49:07 by tlucille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,8 @@ int			get_next_line(const int fd, char **line)
 	t_list			*actual;
 	char			buf[BUFF_SIZE + 1];
 
-	actual = NULL;
-	if (fd < 0 || fd > 7168 || line == NULL || read(fd, buf, 0) == -1)
+	if (fd < 0 || fd > 7168 || BUFF_SIZE < 1 || line
+			== NULL || read(fd, buf, 0) == -1)
 		return (-1);
 	if ((prev[fd] == NULL || prev[fd]->rest == NULL))
 	{
